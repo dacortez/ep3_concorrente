@@ -4,20 +4,18 @@ public class Cook extends Thread {
 	
 	// Pote (monitor) disponível ao cozinheiro
 	private PotMonitor pot;
-		
+	
+	public Cook(String name) {
+		super(name);
+	}
+	
 	public void setPot(PotMonitor pot) {
 		this.pot = pot;
 	}
 	
 	@Override
 	public void run() {
-		while (true) {
-			try {
-				pot.makePortions(this);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		while (true)
+			pot.makePortions(this);
 	}
 }

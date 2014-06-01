@@ -4,10 +4,15 @@ import java.util.concurrent.Semaphore;
 
 public class PotMonitor {
 	
-	private static int cfull = 0;
-	
-	// Capacidade C >= 1 de porções do pote.
+	// Capacidade C > 0 de porções do pote
 	private int capacity;
+	
+	// Número de vezes que o pote deve esvaziar
+	@SuppressWarnings("unused")
+	private int repetitions;
+	
+	// Modo de execução do monitor (uniforme ou com pesos)
+	private SimulationMode mode;
 	
 	// Variável de condição associada ao pote cheio
 	private ConditionVariable potFull;
@@ -24,36 +29,67 @@ public class PotMonitor {
 	// Referência a thread atual rodando no monitor 
 	private Thread thread;
 			
-	public PotMonitor(int capacity) {
+	public PotMonitor(int capacity, int repetitions, SimulationMode mode) {
 		this.capacity = capacity;
+		this.repetitions = repetitions;
+		this.mode = mode;
 		potFull = new ConditionVariable();
 		potEmpty = new ConditionVariable();
-		lock = new Semaphore(1);
+		lock = new Semaphore(1, true);
 		portions = 0;
 	}
 	
-	public void eatPortion(Savage savage) throws InterruptedException {
-		lock.acquire();
+	public void eatPortion(Savage savage) {
+		acquireLock(savage);
 		while (portions == 0) {
 			signal(potEmpty);
 			thread = savage;
-			wait(potFull);
+			if (mode == SimulationMode.UNIFORM)
+				wait(potFull);
+			else if (mode == SimulationMode.WITH_WEIGHTS)
+				wait(potFull, savage.getRank());
+			//if (repetitions == 0) {
+			//	lock.release();
+			//	return;
+			//}
 		}
 		portions--;
+		System.out.println("[Porção comida por " + savage.getName() + "]");
+		System.out.println("[Restando " + portions + " porções no pote]");
+		//if (portions == 0 && --repetitions == 0) { 
+		//	signal_all(potFull);
+		//	signal_all(potEmpty);
+		//}
 		lock.release();
 	}
 	
-	public void makePortions(Cook cook) throws InterruptedException {
-		lock.acquire();
+	public void makePortions(Cook cook) {
+		acquireLock(cook);
 		while (portions > 0) {
 			thread = cook;
 			wait(potEmpty);
+			//if (repetitions == 0) {
+			//	lock.release();
+			//	return;
+			//}
 		}
 		portions = capacity;
-		System.out.println("Pote cheio " + cfull++);
+		System.out.println("[Pote preenchido por " + cook.getName() + "]");
+		System.out.println("[Restando " + portions + " porções no pote]");
 		signal_all(potFull);
 		lock.release();
 	}
+	
+	private void acquireLock(Thread thread) {
+		try {
+			lock.acquire();
+		} catch (InterruptedException e) {
+			System.err.println("Falha ao tentar adquirir a trava: " + thread.getName());
+			e.printStackTrace();
+		}
+	}
+	
+	//////////////// Métodos exigidos pelo enunciado do EP ////////////////
 	
 	@SuppressWarnings("unused")
 	private boolean empty(ConditionVariable cv) {
@@ -64,7 +100,6 @@ public class PotMonitor {
 		cv.wait(thread, lock);
 	}
 	
-	@SuppressWarnings("unused")
 	private void wait(ConditionVariable cv, int rank) {
 		cv.wait(thread, rank, lock);
 	}

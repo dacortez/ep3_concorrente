@@ -12,13 +12,13 @@ public class Savage extends Thread implements Rankable {
 		this.pot = pot;
 	}
 	
-	public Savage() {
-		super();
+	public Savage(String name) {
+		super(name);
 		weight = 0;
 	}
 	
-	public Savage(int weight) {
-		super();
+	public Savage(String name, int weight) {
+		super(name);
 		this.weight = weight;
 	}
 	
@@ -29,13 +29,7 @@ public class Savage extends Thread implements Rankable {
 
 	@Override
 	public void run() {
-		while (true) {
-			try {
-				pot.eatPortion(this);
-			} catch (InterruptedException e) {
-				System.err.println("Selvagem " + getId());
-				e.printStackTrace();
-			}
-		}
+		while (true)
+			pot.eatPortion(this);
 	}
 }
