@@ -15,18 +15,19 @@ public class ConditionVariable {
 
 	public ConditionVariable() {
 		queue = new ArrayList<Thread>();
+		sems = new HashMap<Thread, Semaphore>();
 	}
 	
-	public boolean empty() {
+	public boolean isEmpty() {
 		return queue.isEmpty();
 	}
 	
-	public void wait(Thread thread, Semaphore lock) throws InterruptedException {
+	public void wait(Thread thread, Semaphore lock) {
 		queue.add(thread);
 		releaseLockAndAcquireThreadSemaphore(thread, lock);
 	}
 	
-	public void wait(Thread thread, int rank, Semaphore lock) throws InterruptedException {
+	public void wait(Thread thread, int rank, Semaphore lock) {
 		addToQueueWithRank(thread, rank);
 		releaseLockAndAcquireThreadSemaphore(thread, lock);
 	}
@@ -44,13 +45,18 @@ public class ConditionVariable {
 		queue.add(thread);
 	}
 	
-	private void releaseLockAndAcquireThreadSemaphore(Thread thread, Semaphore lock) throws InterruptedException {
-		if (!sems.containsKey(thread))
+	private void releaseLockAndAcquireThreadSemaphore(Thread thread, Semaphore lock) {
+		if (!sems.containsKey(thread)) 
 			sems.put(thread, new Semaphore(0));
 		Semaphore threadSem = sems.get(thread);
 		lock.release();
-		threadSem.acquire();
-		lock.acquire();
+		try {
+			threadSem.acquire();
+			lock.acquire();
+		} catch (InterruptedException e) {
+			System.err.println("Erro ao adquirir semaforo.");
+			e.printStackTrace();
+		}
 	}
 	
 	public void signal() {
@@ -69,7 +75,7 @@ public class ConditionVariable {
 		}
 	}
 	
-	public int minRank() {
+	public int getMinRank() {
 		for (int i = 0; i < queue.size(); ++i) {
 			Thread element = queue.get(i);
 			if (element instanceof Rankable)

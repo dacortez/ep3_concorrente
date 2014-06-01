@@ -1,8 +1,5 @@
 package dacortez.diningSavages;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 public class PotMonitor {
@@ -13,13 +10,10 @@ public class PotMonitor {
 	private int capacity;
 	
 	// Variável de condição associada ao pote cheio
-	private Queue<Thread> potFull;
+	private ConditionVariable potFull;
 	
 	// Variável de condição associada ao pote vazio
-	private Queue<Thread> potEmpty;
-	
-	// Um semáforo por processo
-	private HashMap<Thread, Semaphore> semaphores;
+	private ConditionVariable potEmpty;
 	
 	// Lock para garantir exclusão mútua
 	private Semaphore lock;
@@ -27,14 +21,13 @@ public class PotMonitor {
 	// Número de porções no pote.
 	private int portions;
 	
-	// Referência a thread rodando no monitor 
+	// Referência a thread atual rodando no monitor 
 	private Thread thread;
 			
 	public PotMonitor(int capacity) {
 		this.capacity = capacity;
-		potFull = new LinkedList<Thread>();
-		potEmpty = new LinkedList<Thread>();
-		semaphores = new HashMap<Thread, Semaphore>();
+		potFull = new ConditionVariable();
+		potEmpty = new ConditionVariable();
 		lock = new Semaphore(1);
 		portions = 0;
 	}
@@ -63,45 +56,29 @@ public class PotMonitor {
 	}
 	
 	@SuppressWarnings("unused")
-	private boolean empty(Queue<Thread> cv) {
+	private boolean empty(ConditionVariable cv) {
 		return cv.isEmpty();
 	}
 	
-	private void wait(Queue<Thread> cv) throws InterruptedException {
-		cv.add(thread);
-		if (!semaphores.containsKey(thread))
-			semaphores.put(thread, new Semaphore(0));
-		Semaphore sem = semaphores.get(thread);
-		lock.release();
-		sem.acquire();
-		lock.acquire();
+	private void wait(ConditionVariable cv)  {
+		cv.wait(thread, lock);
 	}
 	
 	@SuppressWarnings("unused")
-	private void wait(Queue<Thread> cv, int rank) throws InterruptedException {
-		// TODO
-		wait(cv);
+	private void wait(ConditionVariable cv, int rank) {
+		cv.wait(thread, rank, lock);
 	}
 	
-	private void signal(Queue<Thread> cv) {
-		if (!cv.isEmpty()) {
-			Thread first = cv.poll();
-			Semaphore sem = semaphores.get(first);
-			sem.release();
-		}
+	private void signal(ConditionVariable cv) {
+		cv.signal();
 	}
 	
-	private void signal_all(Queue<Thread> cv) {
-		while (!cv.isEmpty()) {
-			Thread first = cv.poll();
-			Semaphore sem = semaphores.get(first);
-			sem.release();
-		}
+	private void signal_all(ConditionVariable cv) {
+		cv.signalAll();
 	}
 	
 	@SuppressWarnings("unused")
-	private int minrank(Queue<Thread> cv) {
-		// TODO
-		return 0;
+	private int minrank(ConditionVariable cv) {
+		return cv.getMinRank();
 	}
 }
