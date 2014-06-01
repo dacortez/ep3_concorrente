@@ -8,7 +8,6 @@ public class PotMonitor {
 	private int capacity;
 	
 	// Número de vezes que o pote deve esvaziar
-	@SuppressWarnings("unused")
 	private int repetitions;
 	
 	// Modo de execução do monitor (uniforme ou com pesos)
@@ -39,43 +38,69 @@ public class PotMonitor {
 		portions = 0;
 	}
 	
+	public boolean repetitionsIsFinished() {
+		return repetitions == 0;
+	}
+	
 	public void eatPortion(Savage savage) {
 		acquireLock(savage);
+		if (repetitions == 0) {
+			lock.release();
+			return;
+		}
 		while (portions == 0) {
+			// Primeiro selvagem percebeu o pote vazio
+			if (empty(potFull)) {
+				System.out.println("<Selvagem " + savage.getName() + " notou o pote vazio>");
+				printTotals();
+			}
 			signal(potEmpty);
 			thread = savage;
 			if (mode == SimulationMode.UNIFORM)
 				wait(potFull);
 			else if (mode == SimulationMode.WITH_WEIGHTS)
 				wait(potFull, savage.getRank());
-			//if (repetitions == 0) {
-			//	lock.release();
-			//	return;
-			//}
+			if (repetitions == 0) {
+				lock.release();
+				return;
+			}
 		}
-		portions--;
-		System.out.println("[Porção comida por " + savage.getName() + "]");
-		System.out.println("[Restando " + portions + " porções no pote]");
-		//if (portions == 0 && --repetitions == 0) { 
-		//	signal_all(potFull);
-		//	signal_all(potEmpty);
-		//}
+		savage.updateTotalEaten();
+		if (--portions == 0 && --repetitions == 0) {
+			printTotals();
+			signal_all(potFull);
+			signal_all(potEmpty);
+		}
 		lock.release();
+	}
+
+	private void printTotals() {
+		for (Savage savage : DiningSavages.getSavages())
+			System.out.println("Selvagem " + savage.getName() + " comeu " + savage.getTotalEaten() + " vezes");
+		for (Cook cook : DiningSavages.getCooks())
+			System.out.println("Cozinheiro " + cook.getName() + " encheu " + cook.getTotalFilled() + " vezes");
 	}
 	
 	public void makePortions(Cook cook) {
 		acquireLock(cook);
+		if (repetitions == 0) {
+			lock.release();
+			return;
+		}
 		while (portions > 0) {
 			thread = cook;
 			wait(potEmpty);
-			//if (repetitions == 0) {
-			//	lock.release();
-			//	return;
-			//}
+			if (repetitions == 0) {
+				lock.release();
+				return;
+			}
 		}
+	
+		// Cozinheiro encheu o pote
 		portions = capacity;
-		System.out.println("[Pote preenchido por " + cook.getName() + "]");
-		System.out.println("[Restando " + portions + " porções no pote]");
+		cook.updateTotalFilled();
+		System.out.println("[Cozinheiro " + cook.getName() + " encheu o pote]");
+	
 		signal_all(potFull);
 		lock.release();
 	}
@@ -91,7 +116,6 @@ public class PotMonitor {
 	
 	//////////////// Métodos exigidos pelo enunciado do EP ////////////////
 	
-	@SuppressWarnings("unused")
 	private boolean empty(ConditionVariable cv) {
 		return cv.isEmpty();
 	}

@@ -18,11 +18,19 @@ public class DiningSavages {
 	private int capacity;
 			
 	// Lista de selvagens
-	private List<Savage> savages;
+	private static List<Savage> savages;
 	
 	// Lista de cozinheiros
-	private List<Cook> cooks;
-		
+	private static List<Cook> cooks;
+	
+	public static List<Savage> getSavages() {
+		return savages;
+	}
+	
+	public static List<Cook> getCooks() {
+		return cooks;
+	}
+	
 	public static void main(String[] args) {
 		if (args.length != 3) {
 			printUsage();
@@ -70,13 +78,13 @@ public class DiningSavages {
 	private void createSavages(String[] weights) {
 		savages = new ArrayList<Savage>(numberOfSavages);
 		for (int i = 0; i < weights.length; ++i)
-			savages.add(new Savage("S" + i, Integer.parseInt(weights[i])));
+			savages.add(new Savage("S" + (i + 1), Integer.parseInt(weights[i])));
 	}
 	
 	private void createCooks() {
 		cooks = new ArrayList<Cook>(numberOfCooks);
 		for (int i = 0; i < numberOfCooks; ++i)
-			cooks.add(new Cook("C" + i));
+			cooks.add(new Cook("C" + (i + 1)));
 	}
 	
 	public void simulate(int repetitions, SimulationMode mode) {
@@ -95,7 +103,7 @@ public class DiningSavages {
 		System.out.println("R = " + repetitions);
 		System.out.println("U|W = " + mode);
 		for (Savage savage : savages) 
-			System.out.println("Peso[" + savage.getName() + "] = " + savage.getRank());
+			System.out.println("Peso(" + savage.getName() + ") = " + savage.getRank());
 	}
 	
 	private void setPotToCooks(PotMonitor pot) {

@@ -10,7 +10,7 @@ public class ConditionVariable {
 	// Fila de threads aguardando na variável de condição
 	private List<Thread> queue;
 	
-	// Um semáforo por thread
+	// Um semáforo privado por thread
 	private HashMap<Thread, Semaphore> sems;
 
 	public ConditionVariable() {
@@ -36,8 +36,9 @@ public class ConditionVariable {
 		for (int i = 0; i < queue.size(); ++i) {
 			Thread element = queue.get(i);
 			if (element instanceof Rankable) {
-				if (((Rankable)element).getRank() > rank) {
+				if (((Rankable)element).getRank() < rank) {
 					queue.add(i, thread);
+					//System.out.println(this);
 					return;
 				}
 			}
@@ -54,7 +55,7 @@ public class ConditionVariable {
 			threadSem.acquire();
 			lock.acquire();
 		} catch (InterruptedException e) {
-			System.err.println("Erro ao adquirir semaforo.");
+			System.err.println("Erro ao adquirir semaforo: " + thread.getName());
 			e.printStackTrace();
 		}
 	}
@@ -82,5 +83,15 @@ public class ConditionVariable {
 				return ((Rankable)element).getRank();
 		}
 		return -1;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("FILA =====================\n");
+		for (Thread thread : queue)
+			sb.append(thread.toString()).append("\n");
+		sb.append("==========================");
+		return sb.toString();
 	}
 }
