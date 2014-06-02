@@ -1,5 +1,11 @@
 package dacortez.diningSavages;
 
+/**
+ * Classe que representa um selvagem do problema. 
+ * 
+ * @author Daniel Augusto Cortez
+ * @version 02.06.2014
+ */
 public class Savage extends Thread implements Rankable {
 	
 	// Peso do selvagem

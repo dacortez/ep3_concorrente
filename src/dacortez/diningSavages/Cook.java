@@ -1,5 +1,11 @@
 package dacortez.diningSavages;
 
+/**
+ * Classe que representa um cozinheiro do problema.  
+ * 
+ * @author Daniel Augusto Cortez
+ * @version 02.06.2014
+ */
 public class Cook extends Thread {
 	
 	// Número de vezes que o cozinheiro encheu o pote

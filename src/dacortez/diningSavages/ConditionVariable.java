@@ -5,6 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
+/**
+ * Variável de condição a ser utilizada pelo monitor. 
+ * 
+ * @author Daniel Augusto Cortez
+ * @version 02.06.2014
+ */
 public class ConditionVariable {
 
 	// Fila de threads aguardando na variável de condição
@@ -38,7 +44,6 @@ public class ConditionVariable {
 			if (element instanceof Rankable) {
 				if (((Rankable)element).getRank() < rank) {
 					queue.add(i, thread);
-					//System.out.println(this);
 					return;
 				}
 			}
@@ -55,7 +60,7 @@ public class ConditionVariable {
 			threadSem.acquire();
 			lock.acquire();
 		} catch (InterruptedException e) {
-			System.err.println("Erro ao adquirir semaforo: " + thread.getName());
+			System.err.println("Erro ao tentar adquirir semaforo: " + thread.getName());
 			e.printStackTrace();
 		}
 	}
@@ -88,7 +93,7 @@ public class ConditionVariable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("FILA =====================\n");
+		sb.append("==========================\n");
 		for (Thread thread : queue)
 			sb.append(thread.toString()).append("\n");
 		sb.append("==========================");

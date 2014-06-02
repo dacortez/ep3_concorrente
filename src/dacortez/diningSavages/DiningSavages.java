@@ -6,6 +6,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Realiza a simulação do problema do jantar dos selvagens
+ * utilizando um arquivo de entrada, o número de repetições 
+ * e o modo da simulação informados na linha de comando.
+ * Produz a saída especificada e os arquivos para confecção
+ * dos gráficos solicitados. 
+ * 
+ * @author Daniel Augusto Cortez
+ * @version 02.06.2014
+ */
 public class DiningSavages {
 
 	// Número N > 1 de selvagens
@@ -88,10 +98,10 @@ public class DiningSavages {
 	}
 	
 	public void simulate(int repetitions, SimulationMode mode) {
-		printInput(repetitions, mode);
 		PotMonitor pot = new PotMonitor(capacity, repetitions, mode);
 		setPotToCooks(pot);
 		setPotToSavages(pot);
+		printInput(repetitions, mode);
 		startCooks();
 		startSavages();
 	}
@@ -102,8 +112,18 @@ public class DiningSavages {
 		System.out.println("M = " + numberOfCooks);
 		System.out.println("R = " + repetitions);
 		System.out.println("U|W = " + mode);
+		printSavages();
+		printCooks();
+	}
+
+	private void printSavages() {
 		for (Savage savage : savages) 
-			System.out.println("Peso(" + savage.getName() + ") = " + savage.getRank());
+			System.out.println(savage);
+	}
+	
+	private void printCooks() {
+		for (Cook cook : cooks) 
+			System.out.println(cook);
 	}
 	
 	private void setPotToCooks(PotMonitor pot) {
