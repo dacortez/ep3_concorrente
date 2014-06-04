@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
- * Monitor para o problema do jantar dos selvagens que garante
- * a sincronização para acesso ao pote de comida. 
+ * Monitor para o problema do jantar dos selvagens. 
+ * Garante a sincronização para acesso ao pote de comida 
+ * entre selvagens e cozinheiros. 
  * 
  * @author Daniel Augusto Cortez
- * @version 02.06.2014
+ * @version 04.06.2014
  */
 public class PotMonitor {
 	
@@ -77,7 +78,7 @@ public class PotMonitor {
 		}
 	}
 	
-	public boolean repetitionsIsFinished() {
+	public boolean isFinished() {
 		return (repetitions == 0);
 	}
 	
@@ -120,14 +121,6 @@ public class PotMonitor {
 		signal_all(potFull);
 		signal_all(potEmpty);
 	}
-	
-	private void writePointsOfGraphTwo() {
-		if (graphTwo != null) {
-			List<Savage> savages = DiningSavages.getSavages();
-			for (int i = 0; i < savages.size(); ++i) 
-				graphTwo.println((i + 1) + "\t" + savages.get(i).getTotalEaten());
-		}
-	}
 
 	private void printTotals() {
 		printSavagesTotal();
@@ -142,6 +135,14 @@ public class PotMonitor {
 	private void printCooksTotal() {
 		for (Cook cook : DiningSavages.getCooks())
 			System.out.println("Cozinheiro " + cook.getName() + " encheu " + cook.getTotalFilled() + " vezes");
+	}
+	
+	private void writePointsOfGraphTwo() {
+		if (graphTwo != null) {
+			List<Savage> savages = DiningSavages.getSavages();
+			for (int i = 0; i < savages.size(); ++i) 
+				graphTwo.printf("%d\t%d\n", i + 1, savages.get(i).getTotalEaten());
+		}
 	}
 	
 	public void makePortions(Cook cook) {
@@ -166,10 +167,8 @@ public class PotMonitor {
 	}
 	
 	private void appendPointToGraphOne() {
-		if (graphOne != null) {
-			filled++;
-			graphOne.println(filled + "\t" + averageFilled());
-		}
+		if (graphOne != null) 
+	        graphOne.printf("%d\t%.3f\n", ++filled, averageFilled());
 	}
 	
 	private double averageFilled() {

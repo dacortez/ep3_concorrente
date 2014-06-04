@@ -37,7 +37,7 @@ public class Savage extends Thread implements Rankable {
 	
 	@Override
 	public void run() {
-		while (!pot.repetitionsIsFinished())
+		while (!pot.isFinished())
 			pot.eatPortion(this);
 	}
 	

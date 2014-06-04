@@ -28,17 +28,17 @@ public class ConditionVariable {
 		return queue.isEmpty();
 	}
 	
-	public void wait(Thread thread, Semaphore lock) {
+	public void wait(Thread thread, Semaphore monitorLock) {
 		queue.add(thread);
-		releaseLockAndAcquireThreadSemaphore(thread, lock);
+		releaseLockAndAcquireThreadSemaphore(thread, monitorLock);
 	}
 	
-	public void wait(Thread thread, int rank, Semaphore lock) {
-		addToQueueWithRank(thread, rank);
-		releaseLockAndAcquireThreadSemaphore(thread, lock);
+	public void wait(Thread thread, int rank, Semaphore monitorLock) {
+		addToQueueUsingRank(thread, rank);
+		releaseLockAndAcquireThreadSemaphore(thread, monitorLock);
 	}
 
-	private void addToQueueWithRank(Thread thread, int rank) {
+	private void addToQueueUsingRank(Thread thread, int rank) {
 		for (int i = 0; i < queue.size(); ++i) {
 			Thread element = queue.get(i);
 			if (element instanceof Rankable) {
@@ -51,16 +51,16 @@ public class ConditionVariable {
 		queue.add(thread);
 	}
 	
-	private void releaseLockAndAcquireThreadSemaphore(Thread thread, Semaphore lock) {
+	private void releaseLockAndAcquireThreadSemaphore(Thread thread, Semaphore monitorLock) {
 		if (!sems.containsKey(thread)) 
 			sems.put(thread, new Semaphore(0));
 		Semaphore threadSem = sems.get(thread);
-		lock.release();
+		monitorLock.release();
 		try {
 			threadSem.acquire();
-			lock.acquire();
+			monitorLock.acquire();
 		} catch (InterruptedException e) {
-			System.err.println("Erro ao tentar adquirir semaforo: " + thread.getName());
+			System.err.println("Erro ao tentar adquirir semaforo privado: " + thread.getName());
 			e.printStackTrace();
 		}
 	}
@@ -82,7 +82,7 @@ public class ConditionVariable {
 	}
 	
 	public int getMinRank() {
-		for (int i = 0; i < queue.size(); ++i) {
+		for (int i = queue.size() - 1; i >= 0; --i) {
 			Thread element = queue.get(i);
 			if (element instanceof Rankable)
 				return ((Rankable)element).getRank();

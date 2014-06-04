@@ -33,7 +33,7 @@ public class Cook extends Thread {
 	
 	@Override
 	public void run() {
-		while (!pot.repetitionsIsFinished())
+		while (!pot.isFinished())
 			pot.makePortions(this);
 	}
 	
