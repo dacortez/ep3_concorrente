@@ -6,10 +6,14 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
- * Variável de condição a ser utilizada pelo monitor. 
+ * Variável de condição a ser utilizada pelo monitor.
+ * Contém uma fila de threads que aguardam a condição ser verdadeira
+ * na variável. As threads podem aguardar com prioridade, desde que 
+ * implementem a interface Rankable. Threads com maior prioridade 
+ * (rank) aguardam no começo da fila. 
  * 
  * @author Daniel Augusto Cortez
- * @version 02.06.2014
+ * @version 07.06.2014
  */
 public class ConditionVariable {
 
@@ -33,6 +37,15 @@ public class ConditionVariable {
 		releaseLockAndAcquireThreadSemaphore(thread, monitorLock);
 	}
 	
+	/**
+	 * Insere a thread na fila com a prioridade rank. Quanto maior o rank,
+	 * maior a prioridade da thread, isto é, a fila é ordenada em ordem 
+	 * decrescente de rank.
+	 * 
+	 * @param thread Thread a ser inserida na fila.
+	 * @param rank Prioridade da thread.
+	 * @param monitorLock Lock associado ao monitor que usa a fila.
+	 */
 	public void wait(Thread thread, int rank, Semaphore monitorLock) {
 		addToQueueUsingRank(thread, rank);
 		releaseLockAndAcquireThreadSemaphore(thread, monitorLock);
@@ -81,6 +94,12 @@ public class ConditionVariable {
 		}
 	}
 	
+	/**
+	 * Devolve a menor prioridade das threads aguardando na fila da variável.
+	 * 
+	 * @return Rank da thread de menor prioridade (final da fila). 
+	 * Retorna -1 se a fila estiver vazia, ou nenhuma thread tiver prioridade.
+	 */
 	public int getMinRank() {
 		for (int i = queue.size() - 1; i >= 0; --i) {
 			Thread element = queue.get(i);

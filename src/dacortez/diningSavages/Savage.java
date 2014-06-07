@@ -1,10 +1,12 @@
 package dacortez.diningSavages;
 
 /**
- * Classe que representa um selvagem do problema. 
+ * Classe que representa um selvagem do problema. Os selvagens
+ * podem ser tratados com pesos (prioridades), portanto 
+ * implementam a interface Rankable.
  * 
  * @author Daniel Augusto Cortez
- * @version 02.06.2014
+ * @version 07.06.2014
  */
 public class Savage extends Thread implements Rankable {
 	
@@ -25,9 +27,9 @@ public class Savage extends Thread implements Rankable {
 		this.pot = pot;
 	}
 	
-	public Savage(String name, int weight) {
+	public Savage(String name) {
 		super(name);
-		this.weight = weight;
+		weight = 0;
 		totalEaten = 0;
 	}
 	
@@ -39,6 +41,11 @@ public class Savage extends Thread implements Rankable {
 	public void run() {
 		while (!pot.isFinished())
 			pot.eatPortion(this);
+	}
+	
+	@Override
+	public void setRank(int rank) {
+		weight = rank;
 	}
 	
 	@Override

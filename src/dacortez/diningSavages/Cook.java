@@ -1,10 +1,12 @@
 package dacortez.diningSavages;
 
 /**
- * Classe que representa um cozinheiro do problema.  
+ * Classe que representa um cozinheiro do problema.
+ * Os cozinheiro são tratados de fomra uniforme, portanto
+ * não apresentam prioridades.  
  * 
  * @author Daniel Augusto Cortez
- * @version 02.06.2014
+ * @version 07.06.2014
  */
 public class Cook extends Thread {
 	

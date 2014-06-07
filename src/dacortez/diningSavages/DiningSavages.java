@@ -87,8 +87,11 @@ public class DiningSavages {
 
 	private void createSavages(String[] weights) {
 		savages = new ArrayList<Savage>(numberOfSavages);
-		for (int i = 0; i < weights.length; ++i)
-			savages.add(new Savage("S" + (i + 1), Integer.parseInt(weights[i])));
+		for (int i = 0; i < weights.length; ++i) {
+			Savage savage = new Savage("S" + (i + 1));
+			savage.setRank(Integer.parseInt(weights[i]));
+			savages.add(savage);
+		}
 	}
 	
 	private void createCooks() {
