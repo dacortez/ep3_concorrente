@@ -171,6 +171,13 @@ public class PotMonitor {
 	        graphOne.printf("%d\t%.3f\n", ++filled, averageFilled());
 	}
 	
+	/**
+	 * Devolve o número médio de vezes que cada cozinheiro foi acordado, 
+	 * ou seja, o número médio de vezes que cada cozinheiro foi acordado.
+	 * 
+	 * @return Total de vezes que cada cozinheiro encheu o pote / Número
+	 * de cozinheiros.
+	 */
 	private double averageFilled() {
 		List<Cook> cooks = DiningSavages.getCooks();
 		int total = 0;
