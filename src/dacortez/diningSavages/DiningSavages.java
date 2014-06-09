@@ -108,6 +108,16 @@ public class DiningSavages {
 		startCooks();
 		startSavages();
 	}
+		
+	private void setPotToCooks(PotMonitor pot) {
+		for (Cook cook : cooks) 
+			cook.setPot(pot);
+	}
+	
+	private void setPotToSavages(PotMonitor pot) {
+		for (Savage savage : savages) 
+			savage.setPot(pot);
+	}
 	
 	public void printInput(int repetitions, SimulationMode mode) {
 		System.out.println("N = " + numberOfSavages);
@@ -127,16 +137,6 @@ public class DiningSavages {
 	private void printCooks() {
 		for (Cook cook : cooks) 
 			System.out.println(cook);
-	}
-	
-	private void setPotToCooks(PotMonitor pot) {
-		for (Cook cook : cooks) 
-			cook.setPot(pot);
-	}
-	
-	private void setPotToSavages(PotMonitor pot) {
-		for (Savage savage : savages) 
-			savage.setPot(pot);
 	}
 	
 	private void startCooks() {
