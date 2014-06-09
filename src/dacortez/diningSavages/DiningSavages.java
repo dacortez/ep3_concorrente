@@ -54,8 +54,8 @@ public class DiningSavages {
 	}
 
 	private static void printUsage() {
-		System.out.println("Uso: java -jar DiningSavages <arquivo> <R> <U|P>");
-		System.out.println("onde:");
+		System.out.println("Uso: java -jar DiningSavages.jar <arquivo> <R> <U|P>");
+		System.out.println("Onde:");
 		System.out.println("  arquivo \t Arquivo de entrada");
 		System.out.println("        R \t Número de repetições");
 		System.out.println("        U \t Situação uniforme");
@@ -104,12 +104,12 @@ public class DiningSavages {
 		PotMonitor pot = new PotMonitor(capacity, repetitions, mode);
 		setPotToCooks(pot);
 		setPotToSavages(pot);
-		printInput(repetitions, mode);
+		// printInput(repetitions, mode);
 		startCooks();
 		startSavages();
 	}
 	
-	private void printInput(int repetitions, SimulationMode mode) {
+	public void printInput(int repetitions, SimulationMode mode) {
 		System.out.println("N = " + numberOfSavages);
 		System.out.println("C = " + capacity);
 		System.out.println("M = " + numberOfCooks);

@@ -78,7 +78,7 @@ public class PotMonitor {
 		}
 	}
 	
-	public boolean isFinished() {
+	public boolean repetitionsIsZero() {
 		return (repetitions == 0);
 	}
 	
@@ -100,9 +100,13 @@ public class PotMonitor {
 			}
 			savage.updateTotalEaten();
 			if (--portions == 0 && --repetitions == 0) {
-				printTotalsAndSignalAll();
+				System.out.println("(Selvagem " + savage.getName() + " notou o pote vazio)");
+				printTotals();
+				signal_all(potFull);
+				signal_all(potEmpty);
 				writePointsOfGraphTwo();
 			}
+			//System.out.println("Selvagem " + savage.getName() + " comeu, restam " + portions + " porções.");
 		}
 		lock.release();
 	}
@@ -113,13 +117,6 @@ public class PotMonitor {
 			wait(potFull);
 		else if (mode == SimulationMode.WITH_WEIGHTS)
 			wait(potFull, savage.getRank());
-	}
-
-	private void printTotalsAndSignalAll() {
-		System.out.println("Finalizando...");
-		printTotals();
-		signal_all(potFull);
-		signal_all(potEmpty);
 	}
 
 	private void printTotals() {
@@ -148,6 +145,11 @@ public class PotMonitor {
 	public void makePortions(Cook cook) {
 		acquireLock(cook);
 		if (repetitions > 0) {
+			wait(potEmpty);
+			if (repetitions == 0) {
+				lock.release();
+				return;
+			}
 			while (portions > 0) {
 				thread = cook;
 				wait(potEmpty);
