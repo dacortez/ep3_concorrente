@@ -87,11 +87,12 @@ public class PotMonitor {
 		if (repetitions > 0) {
 			while (portions == 0) {
 				// Primeiro selvagem percebeu o pote vazio
+				// Ele é o responsável por acordar um cozinheiro
 				if (empty(potFull)) {
 					System.out.println("(Selvagem " + savage.getName() + " notou o pote vazio)");
 					printTotals();
+					signal(potEmpty);
 				}
-				signal(potEmpty);
 				waitForPotToBeFull(savage);
 				if (repetitions == 0) {
 					lock.release();
@@ -100,13 +101,13 @@ public class PotMonitor {
 			}
 			savage.updateTotalEaten();
 			if (--portions == 0 && --repetitions == 0) {
+				// O número de repetições foi finalizado
 				System.out.println("(Selvagem " + savage.getName() + " notou o pote vazio)");
 				printTotals();
 				signal_all(potFull);
 				signal_all(potEmpty);
 				writePointsOfGraphTwo();
 			}
-			//System.out.println("Selvagem " + savage.getName() + " comeu, restam " + portions + " porções.");
 		}
 		lock.release();
 	}
@@ -145,6 +146,7 @@ public class PotMonitor {
 	public void makePortions(Cook cook) {
 		acquireLock(cook);
 		if (repetitions > 0) {
+			thread = cook;
 			wait(potEmpty);
 			if (repetitions == 0) {
 				lock.release();
@@ -158,11 +160,11 @@ public class PotMonitor {
 					return;
 				}
 			}
-			// Cozinheiro encheu o pote
+			// Cozinheiro acordado enche o pote e acorda os famintos
 			portions = capacity;
 			cook.updateTotalFilled();
-			System.out.println("[Cozinheiro " + cook.getName() + " encheu o pote]");
 			appendPointToGraphOne();
+			System.out.println("[Cozinheiro " + cook.getName() + " encheu o pote]");
 			signal_all(potFull);
 		}
 		lock.release();

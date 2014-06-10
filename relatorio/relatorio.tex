@@ -55,8 +55,8 @@
   {\bf Jantar dos Selvagens}
 }
 \author{Daniel Augusto Cortez -- 2960291}
-\date{12 de junho de 2014}
-
+%\date{12 de junho de 2014}
+\date{}
 \maketitle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,9 +65,8 @@
 \section{Introdução}
 \label{sec:intro}
 
-Este relatório descreve a implementação utilizada para resolver o problema do jantar dos selvagens
-proposto no EP, além de apresentar os resultados dos experimentos sugeridos para análise das 
-soluções obtidas.
+Este relatório descreve a implementação proposta para resolver o problema do jantar dos selvagens, 
+bem como apresenta os resultados dos experimentos sugeridos para análise das soluções obtidas. 
 
 A localização do código-fonte com as funções exigidas para manipulação do monitor e a forma de 
 utilização do programa estão disponíveis no arquivo \verb|README|.
@@ -84,7 +83,7 @@ arquivo \verb|DiningSavages.jar| deve ser utilizado para executar o programa.
 O monitor implementado na classe \verb|PotMonitor.java| garante o acesso exclusivo ao pote pelos
 selvagens e pelos cozinheiros. Em alto nível, sem se preocupar com detalhes como o número de vezes 
 que o pote é esvaziado (repetições) e as informações a serem impressas, o código do monitor pode ser 
-escrito como abaixo.
+escrito como abaixo:
 
 \begin{verbatim}
   monitor Pot {
@@ -93,8 +92,9 @@ escrito como abaixo.
 
     procedure eatPortion(Savage savage) {
       while (portions == 0) {
-        signal(potEmpty);
-        wait(potFull);  # wait(potFull, rank(savage)) no caso com pesos
+        # O primeiro faminto que percebe o pote vazio acorda um cozinheiro
+        if (empty(potFull)) signal(potEmpty);
+        wait(potFull);  # No caso com pesos: wait(potFull, rank(savage)) 
       }
       portions = portions - 1;
     }
@@ -110,37 +110,38 @@ escrito como abaixo.
 
 Foram utilizadas duas variáveis de condição: \verb|potEmpty| para indicar quando o pote está vazio, 
 e \verb|potFull| para indicar quando o pote está cheio. O contador \verb|portions| conta quantas 
-porções estão disponíveis no pote. Se \verb|portions == 0| o pote está vazio. Se 
-\verb|portions == C| o pote está cheio. A constante $C$ é a capacidade do pote informada no arquivo 
-de entrada lido pelo programa. 
+porções estão disponíveis no pote. Se \verb|portions = 0| o pote está vazio. Se 
+\verb|portions = C| o pote está cheio. A constante $C$ é a capacidade do pote informada no arquivo 
+de entrada. Note que apenas o primeiro faminto que observa o pote vazio ao tentar comer dele é o 
+responsável por acordar um cozinheiro. Note também que os cozinheiros estão sempre dormindo, eles só 
+acordam quando sinalizados pelos selvagens.
 
-Note como o \verb|wait| com prioridade foi utilizado no caso em que a simulação roda com pesos. 
-Nesse caso, selvagens mais pesados são colocados em ordem na fila da variável \verb|potFull|. Quando 
-essa condição é verdadeira, os mais pesados tem mais chance de acesso ao pote, e portanto, podem 
-comer mais.
+O \verb|wait| com prioridade foi utilizado no caso em que a simulação roda com pesos. Nesse caso, 
+selvagens mais gordos são colocados primeiro na fila da variável \verb|potFull|. Quando essa 
+condição é verdadeira, eles acessam primeiro o pote, e portanto, podem comer mais.
 
-Pela necessidade de se implementar um monitor com prioridades, não se utilizou a implementação 
-padrão dos métodos \verb|wait()| e \verb|notify()| do Java. A implementação do monitor foi feita com
-base em semáforos, conforme exposto nos slides da aula~18. Um {\it lock} é utilizado dentro do 
-monitor para garantir o acesso exclusivo aos métodos. Cada variável de condição possue um vetor 
-privado de semáforos e uma fila de threads. Cada thread na fila aguarda em um semáforo específico do 
-vetor. A implementação da variável de condição é feita na classe \verb|CondionVariable.java|. Note 
-queo na implementação, utilzou-se uma lista ligada para a fila de threads e um \verb|HashMap| para o
-vetor de semáforos. Quando se deseja colocar uma thread na fila com prioridade, essa thread deve 
-implementar a interface \verb|Rankable|. Com isso, pode-se extrair o valor do {\it rank} associado a
-thread e inserí-la em ordem na fila.
+Pela necessidade de se implementar um monitor com prioridades, não se utilizou o métodos padrões
+\verb|wait()| e \verb|notify()| do Java. A implementação do monitor foi feita com base em semáforos,
+conforme exposto nos slides da Aula~18. Um {\it lock} é utilizado dentro do  monitor para garantir o
+acesso exclusivo aos métodos. Cada variável de condição possue um vetor  privado de semáforos e uma
+fila de threads. Cada thread na fila aguarda em um semáforo específico do  vetor. A implementação da
+variável de condição é feita na classe \verb|CondionVariable.java|. Note  que na implementação
+utilzou-se uma lista ligada para a fila de threads e um \verb|HashMap| para o vetor de semáforos.
+Quando se deseja colocar uma thread na fila com prioridade, essa thread deve  implementar a
+interface \verb|Rankable|. Com isso, pode-se extrair o valor do {\it rank} associado à thread e
+inserí-la em ordem na fila.
 
-O selvagem é implementado na classe \verb|Savage.java|. Ele estende a classe \verb|Thread|. O seu 
+O selvagem é implementado na classe \verb|Savage.java|. Ela estende a classe \verb|Thread|. O seu 
 método \verb|run()| chama o procedimento \verb|eatPortion()| do monitor enquanto o número de 
 repetições do pote não se esgotar.
 
-O cozinheiro é implementado na classe \verb|Cook.java|. Ele estende a classe \verb|Thread|. O seu 
+O cozinheiro é implementado na classe \verb|Cook.java|. Ela estende a classe \verb|Thread|. O seu 
 método \verb|run()| chama o procedimento \verb|makePortions()| do monitor enquanto o número de 
 repetições do pote não se esgotar.
 
 A classe \verb|DinigSavages.java| contém o método \verb|main()| do programa. Ele efetua a leitura
 dos parâmetros e faz a instanciação dos objetos de acordo (selvagens, cozinheiros e o monitor). 
-Em seguida, roda a simulação.
+Em seguida, inicializa as threads rodando a simulação.
 
 O número de repetições, que equivale ao número de vezes que o pote é esvaziado, é controlado
 pelo monitor. Esse número é lido da linha de comando e passado ao monitor em sua instancialização.
@@ -157,23 +158,23 @@ iterados enquanto o número de repetições for positivo.
 
 Algumas simulações forma realizadas para testar o correto funcionamento do programa. Elas foram 
 executadas em uma máquina com processador Intel Core i5 (1.6 GHz) com 4Gb de memória RAM, rodando o 
-sistema operacional Linux-Ubuntu MacOS~10.9.2.
+sistema operacional MacOS~10.9.2.
 
-Foram testados dois arquivos de entrada: \verb|simples.txt| e \verb|complexo.txt|. O primeiro 
+Foram utilizados dois arquivos de entrada: \verb|simples.txt| e \verb|complexo.txt|. O primeiro 
 arquivo representa um cenário simples com 6~selvagens e 3~cozinheiros. O segundo arquivo representa 
 um cenário complexo com 20~selvagens e 10~cozinheiros. Os números foram escolhidos de forma 
 arbitrária. A capacidade do pote utilizada no caso simples foi $C = 2$ e no caso complexo $C = 12$. 
-Cada cenário foi avaliado nos casos uniforme e com pesos através de 10.000 repetições. Os resultados
-dos testes estão disponíveis no arquivo \verb|experimentos.xlsx|.
+Cada cenário foi avaliado nos casos uniforme e com pesos através de 1000 repetições. Os dados 
+resultantes dos testes estão disponíveis no arquivo \verb|experimentos.xlsx|.
 
 A Figura~\ref{fig:us} apresenta os resultados da simulação do cenário simples no caso uniforme. Do
 lado esquerda apresenta-se um gráfico (Gráfico~1 do enunciado do EP) em que o eixo horizontal
 representa o tempo lógico da simulação (número de vezes que o pote foi enchido), e o eixo vertical
 representa o  número médio de vezes que cada cozinheiro acordou. Do lado direito apresenta-se um
-gráfico (Gráfico~2 do enunciado do EP) em que o eixo horizontal representa cada selvagem, e o eixo
-vertical  representa o número de porções que cada um deles comeu.
+gráfico (Gráfico~2 do enunciado do EP) em que o eixo horizontal representa os selvagens, e o eixo
+vertical representa o número de porções que cada selvagem comeu.
 
-A Figura~\ref{fig:ps} apresentam os resultados da simulação do cenário simples no caso com pesos. A 
+A Figura~\ref{fig:ps} apresenta os resultados da simulação do cenário simples no caso com pesos. A 
 descrição dos gráficos apresentados é a mesma que no caso anterior.
 
 \begin{figure}[htbp]
@@ -219,21 +220,58 @@ casos anterioriores.
 \section{Conclusões}
 \label{sec:conc}
 
-Vamos fazer a análise dos gráficos apresentados na seção anterior. O comportamento linear do 
-gráfico~1 encontrado em todos os casos foi o esperado, indicando que os mecanismos de sincronização 
-funcionaram corretamente. De fato, se a quantidade de potes é $Q$, então a soma de vezes que cada 
-cozinheiro encheu o pote é $Q$, de forma que a média do número de vezes que cada cozinheiro acordou 
-é $Q/M$ ($M$ é o número de cozinheiros). Isso explica as retas obtidas com coeficiente angular $1/6$ 
-no cenário simples (Figuras~\ref{fig:us} e~\ref{fig:ps}, $M = 6$), e as retas obtidas com 
-coeficiente angular $1/20$ no cenário complexo (Figuras~\ref{fig:uc} e~\ref{fig:pc}, $M = 20$).
+O comportamento linear do gráfico~1 encontrado em todos os casos foi o esperado, indicando que os 
+mecanismos de sincronização funcionaram corretamente. De fato, se a quantidade de potes é $Q$, então 
+a soma de vezes que cada cozinheiro encheu o pote é $Q$, de forma que a média do número de vezes que 
+cada cozinheiro acordou é $Q/M$ ($M$ é o número de cozinheiros). Isso explica as retas obtidas com 
+coeficiente angular $1/6$ no cenário simples (Figuras~\ref{fig:us} e~\ref{fig:ps}, $M = 6$), e as 
+retas obtidas com coeficiente angular $1/20$ no cenário complexo (Figuras~\ref{fig:uc} 
+e~\ref{fig:pc}, $M = 20$).
 
 O comportamento do gráfico~2 em todos os casos também foi o esperado. Observe como nos casos 
 uniforme (Figuras~\ref{fig:us} e~\ref{fig:uc}) a quantidade de vezes que cada selvagem comeu é 
 praticamente a mesma, uma vez que as barras verticais são quase do mesmo tamanho. Já no caso com 
-pesos (Figuras~\ref{fig:ps} e~\ref{fig:pc}), as barras ficaram proporcionais aos pesos dos 
-selvagens, indicando que selvagens mais pesados comeram mais do que selvagens mais leves. Isso 
+pesos (Figuras~\ref{fig:ps} e~\ref{fig:pc}), as barras ficaram mais ou menos proporcionais aos pesos 
+dos selvagens, indicando que selvagens mais gordos comeram mais do que selvagens mais magros. Isso 
 indica que o mecanismo de inserir os selvagens na fila da variável de condição \verb|potFull| com 
 prioridade funcionou corretamente.
+
+Nas simulações escolhemos valores de $C$ (a capacidade do pote) que melhor ilustrassem os 
+comportamentos esperados. Entretanto, observou-se que o comportamento é relativamente sensível a 
+escolha desse parâmetro, sem entretanto, afetar o seu caráter qualitativo esperado.
+
+Para finalizar, gostaríamos de destacar que a saída do programa está de acordo com a lógica 
+implementada. Em particular, observa-se que sempre primeiro um selvagem nota o pote vazio, depois
+é feita a impressão dos totais solicitados no enunciado, e por fim o cozinheiro acordado enche o 
+pote. A saída típica é como no trecho abaixo, extraído durante a simulação do cenário simples no 
+caso uniforme:
+
+\begin{verbatim}
+  ...
+  (Selvagem S3 notou o pote vazio)
+  Selvagem S1 comeu 126 vezes
+  Selvagem S2 comeu 141 vezes
+  Selvagem S3 comeu 145 vezes
+  Selvagem S4 comeu 184 vezes
+  Selvagem S5 comeu 121 vezes
+  Selvagem S6 comeu 215 vezes
+  Cozinheiro C1 encheu 156 vezes
+  Cozinheiro C2 encheu 155 vezes
+  Cozinheiro C3 encheu 155 vezes
+  [Cozinheiro C2 encheu o pote]
+  (Selvagem S3 notou o pote vazio)
+  Selvagem S1 comeu 126 vezes
+  Selvagem S2 comeu 141 vezes
+  Selvagem S3 comeu 147 vezes
+  Selvagem S4 comeu 184 vezes
+  Selvagem S5 comeu 121 vezes
+  Selvagem S6 comeu 215 vezes
+  Cozinheiro C1 encheu 156 vezes
+  Cozinheiro C2 encheu 156 vezes
+  Cozinheiro C3 encheu 155 vezes
+  [Cozinheiro C3 encheu o pote]
+  ...
+\end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
