@@ -146,12 +146,6 @@ public class PotMonitor {
 	public void makePortions(Cook cook) {
 		acquireLock(cook);
 		if (repetitions > 0) {
-			thread = cook;
-			wait(potEmpty);
-			if (repetitions == 0) {
-				lock.release();
-				return;
-			}
 			while (portions > 0) {
 				thread = cook;
 				wait(potEmpty);
