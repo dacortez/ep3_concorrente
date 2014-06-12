@@ -83,7 +83,7 @@ arquivo \verb|DiningSavages.jar| deve ser utilizado para executar o programa.
 O monitor implementado na classe \verb|PotMonitor.java| garante o acesso exclusivo ao pote pelos
 selvagens e pelos cozinheiros. Em alto nível, sem se preocupar com detalhes como o número de vezes 
 que o pote é esvaziado (repetições) e as informações a serem impressas, o código do monitor pode ser 
-escrito como abaixo:
+escrito como 
 
 \begin{verbatim}
   monitor Pot {
@@ -115,7 +115,7 @@ de entrada. Note que apenas o primeiro faminto que observa o pote vazio ao tenta
 responsável por acordar um cozinheiro. Note também que se um cozinheiro tiver acesso ao monitor e 
 verificar que o pote está vazio, ele completará o pote com novas porções. 
 
-O \verb|wait| com prioridade foi utilizado no caso em que a simulação roda com pesos. Nesse caso, 
+O \verb|wait()| com prioridade foi utilizado no caso em que a simulação roda com pesos. Nesse caso, 
 selvagens mais gordos são colocados primeiro na fila da variável \verb|potFull|. Quando essa 
 condição é verdadeira, eles acessam primeiro o pote, e portanto, podem comer mais.
 
@@ -160,11 +160,12 @@ executadas em uma máquina com processador Intel Core i5 (1.6 GHz) com 4Gb de me
 sistema operacional MacOS~10.9.2.
 
 Foram utilizados dois arquivos de entrada: \verb|simples.txt| e \verb|complexo.txt|. O primeiro 
-arquivo representa um cenário simples com 6~selvagens e 3~cozinheiros. O segundo arquivo representa 
+arquivo representa um cenário simples com 2~selvagens e 2~cozinheiros. O segundo arquivo representa 
 um cenário complexo com 20~selvagens e 10~cozinheiros. Os números foram escolhidos de forma 
-arbitrária. A capacidade do pote utilizada no caso simples foi $C = 2$ e no caso complexo $C = 12$. 
-Cada cenário foi avaliado nos casos uniforme e com pesos através de 1000 repetições. Os dados 
-resultantes dos testes estão disponíveis no arquivo \verb|experimentos.xlsx|.
+arbitrária, limitando-se o número de threads ao número de núcleos de CPU no cenário simples. A 
+capacidade do pote utilizada no caso simples foi $C = 3$ e no caso complexo $C = 12$. Cada cenário 
+foi avaliado nas situações uniforme e com pesos através de 1000 repetições. Os dados resultantes das 
+simulações estão disponíveis no arquivo \verb|experimentos.xlsx|.
 
 A Figura~\ref{fig:us} apresenta os resultados da simulação do cenário simples no caso uniforme. Do
 lado esquerda apresenta-se um gráfico (Gráfico~1 do enunciado do EP) em que o eixo horizontal
@@ -176,7 +177,7 @@ vertical representa o número de porções que cada selvagem comeu.
 A Figura~\ref{fig:ps} apresenta os resultados da simulação do cenário simples no caso com pesos. A 
 descrição dos gráficos apresentados é a mesma que no caso anterior.
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \begin{center} 
     \includegraphics[scale=0.5]{uniforme_simples.pdf}
     \caption{Gráficos 1 e 2 para o cenário simples no caso uniforme.}
@@ -184,11 +185,11 @@ descrição dos gráficos apresentados é a mesma que no caso anterior.
   \end{center}
 \end{figure}
 %
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \begin{center}
     \includegraphics[scale=0.5]{pesos_simples.pdf}
     \caption{Gráficos 1 e 2 para o cenário simples no caso com pesos. Os pesos atribuídos aos 
-    selvagens foram 6, 5, 4, 3, 2, 1.}
+    selvagens foram 2, 1.}
     \label{fig:ps}
   \end{center}
 \end{figure}
@@ -197,7 +198,7 @@ As Figura~\ref{fig:uc} e~\ref{fig:pc} apresentam os resultados da simulação do
 casos uniforme e com pesos, respectivamente. A descrição dos gráficos apresentados é a mesma que nos 
 casos anterioriores.
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \begin{center} 
     \includegraphics[scale=0.5]{uniforme_complexo.pdf}
     \caption{Gráficos 1 e 2 para o cenário complexo no caso uniforme.}
@@ -205,7 +206,7 @@ casos anterioriores.
   \end{center}
 \end{figure}
 %
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \begin{center} 
     \includegraphics[scale=0.5]{pesos_complexo.pdf}
     \caption{Gráficos 1 e 2 para o cenário complexo no caso com pesos. Os pesos atribuídos aos 
@@ -223,9 +224,9 @@ O comportamento linear do gráfico~1 encontrado em todos os casos foi o esperado
 mecanismos de sincronização funcionaram corretamente. De fato, se a quantidade de potes é $Q$, então 
 a soma de vezes que cada cozinheiro encheu o pote é $Q$, de forma que a média do número de vezes que 
 cada cozinheiro acordou é $Q/M$ ($M$ é o número de cozinheiros). Isso explica as retas obtidas com 
-coeficiente angular $1/6$ no cenário simples (Figuras~\ref{fig:us} e~\ref{fig:ps}, $M = 6$), e as 
-retas obtidas com coeficiente angular $1/20$ no cenário complexo (Figuras~\ref{fig:uc} 
-e~\ref{fig:pc}, $M = 20$).
+coeficiente angular $1/2$ no cenário simples (Figuras~\ref{fig:us} e~\ref{fig:ps}, $M = 2$), e as 
+retas obtidas com coeficiente angular $1/10$ no cenário complexo (Figuras~\ref{fig:uc} 
+e~\ref{fig:pc}, $M = 10$).
 
 O comportamento do gráfico~2 em todos os casos também foi o esperado. Observe como nos casos 
 uniforme (Figuras~\ref{fig:us} e~\ref{fig:uc}) a quantidade de vezes que cada selvagem comeu é 
@@ -246,31 +247,42 @@ pote. A saída típica é como no trecho abaixo, extraído durante a simulação
 caso uniforme:
 
 \begin{verbatim}
-  ...
-  (Selvagem S3 notou o pote vazio)
-  Selvagem S1 comeu 126 vezes
-  Selvagem S2 comeu 141 vezes
-  Selvagem S3 comeu 145 vezes
-  Selvagem S4 comeu 184 vezes
-  Selvagem S5 comeu 121 vezes
-  Selvagem S6 comeu 215 vezes
-  Cozinheiro C1 encheu 156 vezes
-  Cozinheiro C2 encheu 155 vezes
-  Cozinheiro C3 encheu 155 vezes
+  (Selvagem S2 notou o pote vazio)
+  Selvagem S1 comeu 1484 vezes
+  Selvagem S2 comeu 1486 vezes
+  Cozinheiro C1 encheu 496 vezes
+  Cozinheiro C2 encheu 494 vezes
   [Cozinheiro C2 encheu o pote]
-  (Selvagem S3 notou o pote vazio)
-  Selvagem S1 comeu 126 vezes
-  Selvagem S2 comeu 141 vezes
-  Selvagem S3 comeu 147 vezes
-  Selvagem S4 comeu 184 vezes
-  Selvagem S5 comeu 121 vezes
-  Selvagem S6 comeu 215 vezes
-  Cozinheiro C1 encheu 156 vezes
-  Cozinheiro C2 encheu 156 vezes
-  Cozinheiro C3 encheu 155 vezes
-  [Cozinheiro C3 encheu o pote]
-  ...
+  (Selvagem S1 notou o pote vazio)
+  Selvagem S1 comeu 1485 vezes
+  Selvagem S2 comeu 1488 vezes
+  Cozinheiro C1 encheu 496 vezes
+  Cozinheiro C2 encheu 495 vezes
+  [Cozinheiro C1 encheu o pote]
+  (Selvagem S2 notou o pote vazio)
+  Selvagem S1 comeu 1487 vezes
+  Selvagem S2 comeu 1489 vezes
+  Cozinheiro C1 encheu 497 vezes
+  Cozinheiro C2 encheu 495 vezes
+  [Cozinheiro C2 encheu o pote]
 \end{verbatim}
+
+A situação em que são impressas duas (ou mais) informações de que um cozinheiro encheu o pote, sem
+a impressão da informação de que um selvagem notou o pote vazio também pode ocorrer. Por exemplo:
+
+\begin{verbatim}
+  [Cozinheiro C2 encheu o pote]
+  [Cozinheiro C1 encheu o pote] 
+  (Selvagem S1 notou o pote vazio)
+  Selvagem S1 comeu 1485 vezes
+  Selvagem S2 comeu 1488 vezes
+  Cozinheiro C1 encheu 496 vezes
+  Cozinheiro C2 encheu 495 vezes
+\end{verbatim}
+
+Essa situação ocorre quando um cozinheiro é escalonado e tem acesso ao monitor justamente quando
+o pote está vazio. Nesse caso ele não precisa de nenhum selvagem para acordá-lo, e ele entra no
+monitor preparando novas porções. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
