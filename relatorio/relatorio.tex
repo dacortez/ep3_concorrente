@@ -94,13 +94,12 @@ escrito como abaixo:
       while (portions == 0) {
         # O primeiro faminto que percebe o pote vazio acorda um cozinheiro
         if (empty(potFull)) signal(potEmpty);
-        wait(potFull);  # No caso com pesos: wait(potFull, rank(savage)) 
+        wait(potFull);  # wait(potFull, rank(savage)) 
       }
       portions = portions - 1;
     }
 
     procedure makePortions(Cook cook) {
-      wait(potEmpty);
       while (portions > 0) wait(potEmpty);
       portions = C;
       signal_all(potFull);
@@ -113,8 +112,8 @@ e \verb|potFull| para indicar quando o pote está cheio. O contador \verb|portio
 porções estão disponíveis no pote. Se \verb|portions = 0| o pote está vazio. Se 
 \verb|portions = C| o pote está cheio. A constante $C$ é a capacidade do pote informada no arquivo 
 de entrada. Note que apenas o primeiro faminto que observa o pote vazio ao tentar comer dele é o 
-responsável por acordar um cozinheiro. Note também que os cozinheiros estão sempre dormindo, eles só 
-acordam quando sinalizados pelos selvagens.
+responsável por acordar um cozinheiro. Note também que se um cozinheiro tiver acesso ao monitor e 
+verificar que o pote está vazio, ele completará o pote com novas porções. 
 
 O \verb|wait| com prioridade foi utilizado no caso em que a simulação roda com pesos. Nesse caso, 
 selvagens mais gordos são colocados primeiro na fila da variável \verb|potFull|. Quando essa 
